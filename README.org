@@ -1,0 +1,14 @@
+** TODOs
+
+What is the test error for the best univariate classifier using each
+feature?
+
+** 17 Feb 2016
+
+First train data set from Najmeh, 1200 observations (genomic
+variants/positions) x 7 scores.
+
+Computed test error via 5-fold CV of tree and forest models, which are
+definitely more accurate than a trivial majority classifier.
+
+[[file:figure-test-error.png]]
