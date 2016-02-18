@@ -1,9 +1,17 @@
 ** 18 Feb 2016
 
+I also ctree and cforest models for all pairs of scores. The pair of
+scores that comes closest to the 7-score model is CADD and SIFT. I
+used them to create the following visualization of the predicted
+probabilities of the tree and forest models (when trained in this
+two-dimensional feature space).
+
+[[file:figure-two-features.png]]
+
 Computed the test error for the best univariate thresholding
-classifier using each feature. The best features seem to be Polyphen2
-and CADD, but the multivariate ctree and cforest models definitely
-seem to be more accurate.
+classifier using each feature. The best univariate thresholding models
+are Polyphen2 and CADD, but the multivariate ctree and cforest models
+definitely seem to be more accurate.
 
 [[file:figure-test-error.png]]
 

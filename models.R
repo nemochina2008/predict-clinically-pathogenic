@@ -1,4 +1,4 @@
-works_with_R("3.2.3", glmnet="1.9.5", caret="6.0.41",
+works_with_R("3.2.3",
              party="1.0.13")
 
 load("trainData.RData")
@@ -34,6 +34,28 @@ for(test.fold in unique(folds)){
     list(major.class=rep(names(response.dec)[1], nrow(test.features)),
          ctree=predict(fit.tree, test.df),
          cforest=predict(fit.forest, test.df, OOB=TRUE))
+  pair.df <- 
+    subset(expand.grid(
+      feature1=colnames(train.features),
+      feature2=colnames(train.features)),
+           as.numeric(feature1) < as.numeric(feature2))
+  for(pair.i in 1:nrow(pair.df)){
+    pair.row <- pair.df[pair.i,]
+    feature1 <- paste(pair.row[, 1])
+    feature2 <- paste(pair.row[, 2])
+    two.features <- train.features[, c(feature1, feature2)]
+    two.df <- data.frame(
+      label=factor(train.labels), two.features, check.names=FALSE)
+    for(fun.name in c("ctree", "cforest")){
+      fun <- get(fun.name)
+      two.fit <- fun(label ~ ., two.df)
+      nodash <- function(x)sub("-.*", "", x)
+      model.name <- sprintf(
+        "%s(%s,%s)", fun.name, nodash(feature1), nodash(feature2))
+      test.prediction.list[[model.name]] <-
+        predict(two.fit, test.df, OOB=TRUE)
+    }
+  }
   for(col.name in colnames(train.features)){
     one.feature <- train.features[, col.name]
     thresh.vec <- sort(unique(one.feature))
