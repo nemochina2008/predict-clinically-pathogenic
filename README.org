@@ -15,6 +15,10 @@ two-dimensional feature space).
 
 [[file:figure-two-features.png]]
 
+While talking over tea Simon recommended reading about related methods
+- http://www.columbia.edu/~ii2135/Eigen_11_24.pdf
+- http://www.pnas.org/content/111/4/1253.full.pdf
+
 ** 17 Feb 2016
 
 First train data set from Najmeh, 1200 observations (genomic
