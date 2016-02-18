@@ -34,6 +34,33 @@ for(test.fold in unique(folds)){
     list(major.class=rep(names(response.dec)[1], nrow(test.features)),
          ctree=predict(fit.tree, test.df),
          cforest=predict(fit.forest, test.df, OOB=TRUE))
+  for(col.name in colnames(train.features)){
+    one.feature <- train.features[, col.name]
+    thresh.vec <- sort(unique(one.feature))
+    train.error.list <- list()
+    for(thresh in thresh.vec){
+      is.below <- one.feature < thresh
+      if(any(is.below, na.rm=TRUE)){
+        below.counts <- table(train.labels[is.below])
+        below.ord <- sort(below.counts, decreasing=TRUE)
+        below.class <- names(below.ord)[1]
+        other.class <- ifelse(below.class=="Benign", "Pathogenic", "Benign")
+        pred.vec <- ifelse(is.below, below.class, other.class)
+        is.incorrect <- pred.vec != train.labels
+        train.error.list[[paste(thresh)]] <-
+          data.frame(thresh, below.class, other.class,
+                     train.errors=sum(is.incorrect, na.rm=TRUE),
+                     stringsAsFactors=FALSE)
+      }
+    }
+    train.error <- do.call(rbind, train.error.list)
+    min.row <- which.min(train.error$train.errors)
+    test.feature <- test.features[, col.name]
+    test.feature[is.na(test.feature)] <- mean(test.feature, na.rm=TRUE)
+    test.prediction.list[[col.name]] <- with(train.error[min.row, ], {
+      ifelse(test.feature < thresh, below.class, other.class)
+    })
+  }
   if(FALSE){ #how to deal with missing values in glmnet?
     for(weight.name in names(weight.list)){
       weight.tab <- weight.list[[weight.name]]
