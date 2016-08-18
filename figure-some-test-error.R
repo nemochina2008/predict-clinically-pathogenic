@@ -1,9 +1,8 @@
 works_with_R("3.2.3", ggplot2="1.0.1", data.table="1.9.7")
 
-load("models.RData")
-load("trainData.RData")
+load("some.models.RData")
 
-models.dt <- data.table(models)
+models.dt <- data.table(some.models)
 models.dt[, percent.test.error := 100*test.errors/test.labels]
 stats.dt <- models.dt[, list(mean=mean(percent.test.error)), by=model.name]
 order.dt <- stats.dt[order(mean, decreasing=TRUE),]
@@ -24,7 +23,6 @@ feature.colors <- c(
 names(feature.colors)[8] <- ncol(trainData$feature.mat)
 
 gg <- ggplot()+
-  theme_bw()+
   theme(legend.position="top")+
   scale_color_manual(values=feature.colors)+
   xlab("percent test error (5-fold cross-validation)")+
@@ -33,6 +31,6 @@ gg <- ggplot()+
              shape=1,
              data=models.dt)
 
-png("figure-test-error.png", 500, 2100)
+png("figure-some-test-error.png", 400, 300)
 print(gg)
 dev.off()

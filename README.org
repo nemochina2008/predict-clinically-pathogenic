@@ -1,3 +1,17 @@
+** 18 Aug 2016
+
+- new data from Najmeh, with 16 numeric features.
+- [[file:some.models.R]] computes single-variable and 16-variable models
+  (not all pairs of two-variable models, which takes a long time with
+  so many features).
+- [[file:figure-some-test-error.R]] plots the test error of each model. It
+  is clear that the tree and forest models are more accurate than any
+  single variable model, and that they are about as accurate as
+  several two-variable models, such as ctree or cforest with
+  VEST3_score and CADD_phred.
+
+[[file:figure-some-test-error.png]]
+
 ** 18 Feb 2016
 
 Computed the test error for the best univariate thresholding

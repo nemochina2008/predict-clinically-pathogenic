@@ -5,18 +5,13 @@ load("trainData.RData")
 load("folds.RData")
 
 train.dt <- with(trainData, data.table(clinvar=factor(label.vec), feature.mat))
-train.dt[, MutationTaster := ifelse(is.na(`MutationTaster-score`), -0.5, `MutationTaster-score`)]
+##train.dt[, MutationTaster := ifelse(is.na(`MutationTaster-score`), -0.5, `MutationTaster-score`)]
+train.dt[, VEST3 := ifelse(is.na(VEST3_score), -0.5, VEST3_score)]
 
 ggplot()+
   scale_y_continuous(breaks=c(-0.5, 0, 0.5, 1),
                      labels=c("NA", 0, 0.5, 1))+
-  geom_point(aes(`CADD-score`, MutationTaster, color=clinvar),
-             shape=1,
-             data=train.dt)
-
-train.dt[, SIFT := ifelse(is.na(`SIFT-score-(P.damaging)`), -0.5, `SIFT-score-(P.damaging)`)]
-ggplot()+
-  geom_point(aes(`CADD-score`, SIFT, color=clinvar),
+  geom_point(aes(CADD_phred, VEST3, color=clinvar),
              shape=1,
              data=train.dt)
 

@@ -1,7 +1,7 @@
 works_with_R("3.2.3",
              data.table="1.9.7")
 
-BP <- fread("BP_predictors_selected.txt", na.strings="-")
+BP <- fread("BP-16August.txt", na.strings="-")
 
 is.input <- sapply(BP, is.numeric)
 
