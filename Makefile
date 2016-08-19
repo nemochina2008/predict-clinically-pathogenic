@@ -1,3 +1,11 @@
+BP.other.models.RData: BP.other.models.R BP.other.RData
+	R --no-save < $<
+BP.other.RData: BP.other.R trainData.RData testData.RData folds.RData testData.folds.RData
+	R --no-save < $<
+testData.RData: testData.R 
+	R --no-save < $<
+testData.folds.RData: testData.folds.R testData.RData
+	R --no-save < $<
 figure-some-test-error.png: figure-some-test-error.R some.models.RData
 	R --no-save < $<
 figure-two-features.png: figure-two-features.R
