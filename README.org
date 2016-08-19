@@ -1,3 +1,22 @@
+** 19 Aug 2016
+[[
+file:figure-BP-other-models.R]] makes this interactive figure [[http://bl.ocks.org/tdhock/raw/5dbfe365b3329a6155f027e141cbf803/]] and the following static figures 
+
+[[file:figure-BP-other-models-accuracy.png]]
+
+[[file:figure-BP-other-models-auc.png]]
+
+These data indicate that the models trained on one data set yield
+highly accurate predictions on the other data. The multi-feature model
+is also just about as good as the best single-feature model
+(VEST3_score). The reason why these results are different from the
+previous cross-validation experiment is the treatment of NA values by
+the baseline methods. Before those baseline models were just ignoring
+the NA values. Now those baseline models will predict whatever label
+is more frequent for the NA values in the training set. For example
+this makes a big difference for the VEST3_score, because almost all
+the observations with NA for VEST3_score are Pathogenic.
+
 ** 18 Aug 2016
 
 - new data from Najmeh, with 16 numeric features.
