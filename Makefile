@@ -2,7 +2,7 @@ figure-BP-other-models/index.html: figure-BP-other-models.R BP.other.models.RDat
 	R --no-save < $<
 BP.other.models.RData: BP.other.models.R BP.other.RData
 	R --no-save < $<
-BP.other.RData: BP.other.R trainData.RData testData.RData folds.RData testData.folds.RData
+BP.other.RData: BP.other.R
 	R --no-save < $<
 testData.RData: testData.R 
 	R --no-save < $<
