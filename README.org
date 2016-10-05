@@ -1,3 +1,16 @@
+** 5 Oct 2016
+
+[[file:BP.other.models.R]] performs a fold-fold cross-validation
+experiment with four different data sets, and the new xgboost model.
+
+[[file:figure-BP-other-models.R]] makes a figure that summarizes the
+prediction accuracy of the different models in the four-fold
+cross-validation experiment. It is clear that xgboost is as good as,
+and sometimes better than, the single variable models, for all train
+and test sets.
+
+[[file:figure-BP-other-models-four.png]]
+
 ** 19 Aug 2016
 [[
 file:figure-BP-other-models.R]] makes this interactive figure [[http://bl.ocks.org/tdhock/raw/5dbfe365b3329a6155f027e141cbf803/]] and the following static figures 
