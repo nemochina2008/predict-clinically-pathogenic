@@ -1,3 +1,7 @@
+** 12 Oct 2016
+
+[[http://cbio.mines-paristech.fr/~thocking/figure-BP-other-models/][Interactive figure with ROC curves]].
+
 ** 5 Oct 2016
 
 [[file:BP.other.models.R]] performs a fold-fold cross-validation
