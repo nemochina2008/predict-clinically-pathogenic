@@ -133,6 +133,7 @@ for(test.fold in fold.vec){
             as.numeric(pred.mat)
           })
         pred.thresh.list <- list(
+          xgboost=0.5,
           major.class=0.5,
           ctree=0.5,
           cforest=0.5,
@@ -161,6 +162,9 @@ for(test.fold in fold.vec){
           pred.score <- pred.mat.list[[model.name]]
           roc <- WeightedROC(pred.score, label.int)
           thresh <- pred.thresh.list[[model.name]]
+          if(is.null(thresh)){
+            stop("no threshold for model ", model.name)
+          }
           label.pred <- ifelse(pred.score <= thresh, -1, 1)
           FP <- sum(label.int == -1 & label.pred == 1)
           TP <- sum(label.int == 1 & label.pred == 1)

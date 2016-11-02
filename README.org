@@ -1,3 +1,10 @@
+** 1 Nov 2016
+
+Bugfix: xgboost test error is computed using threshold of 0.5 (before,
+there was no threshold specified).
+
+More portable ggplot2 code.
+
 ** 12 Oct 2016
 
 [[http://cbio.mines-paristech.fr/~thocking/figure-BP-other-models/][Interactive figure with ROC curves]].

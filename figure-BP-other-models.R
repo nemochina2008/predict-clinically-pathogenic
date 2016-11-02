@@ -110,9 +110,7 @@ viz <- list(
   auc=ggplot()+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
-  facet_grid(train.name ~ test.name, labeller=function(var, val){
-    paste(sub(".name", "", var), val)
-  })+
+  facet_grid(train.name ~ test.name, labeller=label_both)+
   scale_color_manual(values=feature.colors)+
   geom_vline(aes(xintercept=mean.auc),
              color="grey",
@@ -128,15 +126,12 @@ viz <- list(
                 size=9,
                 alpha=0.2,
                 color="black",
-                fill=NA,
                data=set.means),
   roc=ggplot()+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
   theme_animint(width=850, height=800)+
-  facet_grid(train.name ~ test.name, labeller=function(var, val){
-    paste(sub(".name", "", var), val)
-  })+
+  facet_grid(train.name ~ test.name, labeller=label_both)+
   scale_color_manual(values=feature.colors)+
   scale_linetype_manual(values=c(balanced="dotted", one="solid"))+
   scale_fill_manual(values=c(balanced="white", one="black"))+
