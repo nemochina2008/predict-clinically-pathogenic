@@ -1,3 +1,5 @@
+predictions.no.folds.RData: predictions.no.folds.R BP.other.RData
+	R --no-save < $<
 figure-BP-other-models/index.html: figure-BP-other-models.R BP.other.models.RData 
 	R --no-save < $<
 BP.other.models.RData: BP.other.models.R BP.other.RData
