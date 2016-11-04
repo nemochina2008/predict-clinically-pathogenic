@@ -1,3 +1,9 @@
+** 4 Nov 2016
+
+[[file:predictions.no.folds.R]] trains and tests models on whole data sets
+(without doing cross-validation). Predicted scores for each model and
+data set are written to the predicted-scores directory.
+
 ** 1 Nov 2016
 
 Bugfix: xgboost test error is computed using threshold of 0.5 (before,
