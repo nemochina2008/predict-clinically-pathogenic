@@ -7,6 +7,7 @@ works_with_R("3.2.3",
              party="1.0.13")
 
 arg.vec <- "data-2016-11-09/train.txt"
+arg.vec <- "data/2013to2016minus-HGMD.txt"
 
 arg.vec <- commandArgs(trailingOnly=TRUE)
 
@@ -50,6 +51,7 @@ weight.list <- list(
   balanced=as.numeric(other.tab[paste(train.df$label)]),
   one=rep(1, nrow(train.df)))
 model.list <- list()
+univariate.model.list <- list()
 for(weight.name in names(weight.list)){
   train.weight.vec <- weight.list[[weight.name]]
   m <- function(model.name){
@@ -68,12 +70,67 @@ for(weight.name in names(weight.list)){
     data=xg.mat,
     nrounds=50
   )
-  ## model.list[[m("cforest")]] <- cforest(
-  ##   label ~ ., train.df, weights=train.weight.vec)
+  model.list[[m("cforest")]] <- cforest(
+    label ~ ., train.df, weights=train.weight.vec)
   model.list[[m("glmnet")]] <- cv.glmnet(
     train.imputed, train.labels, train.weight.vec, family="binomial")
+  single.features.list <- list()
+  for(col.name in colnames(train.features)){
+    one.feature <- train.df[, col.name]
+    train.and.weights <- data.table(train.df, weight=train.weight.vec)
+    na.dt <- train.and.weights[is.na(one.feature),]
+    na.guess <- if(nrow(na.dt)){
+      na.class.weights <- na.dt[, list(weight=sum(weight)), by=label]
+      paste(na.class.weights[which.max(weight), label])
+    }else{
+      "Benign"
+    }
+    not.na <- train.and.weights[!is.na(one.feature),]
+    not.na.feature <- not.na[[col.name]]
+    ord <- order(not.na.feature)
+    train.ord <- data.table(
+      label=not.na$label,
+      feature=not.na.feature,
+      weight=not.na$weight
+      )[ord,]
+    train.counts <- dcast(
+      train.ord,
+      feature ~ label,
+      fun.aggregate=sum,
+      value.var="weight")
+    thresh.dt.list <- list()
+    for(feature.sign in c(1, -1)){
+      thresh.counts <- train.counts[order(feature.sign*feature),]
+      ## Low scores are Benign, high scores are Pathogenic.
+      thresh.counts[, cum.FN := cumsum(Pathogenic)]
+      thresh.counts[, cum.FP := sum(Benign)-cumsum(Benign)]
+      thresh.counts[, n.incorrect := cum.FP + cum.FN]
+      thresh.row <- thresh.counts[which.min(n.incorrect),]
+      thresh <- feature.sign*thresh.row$feature
+      score.vec <- feature.sign*not.na.feature
+      pred.vec <- ifelse(
+        score.vec <= thresh,
+        "Benign", "Pathogenic")
+      range.vec <- range(score.vec)
+      names(range.vec) <- c("Benign", "Pathogenic")
+      is.incorrect <- pred.vec != not.na$label
+      thresh.errors <- sum(is.incorrect * not.na$weight)
+      stopifnot(thresh.errors == thresh.row$n.incorrect)
+      thresh.dt.list[[paste(feature.sign)]] <- data.table(
+        feature.sign, thresh, col.name,
+        na.score=range.vec[[na.guess]],
+        n.incorrect=thresh.row$n.incorrect)
+    }
+    thresh.dt <- do.call(rbind, thresh.dt.list)
+    single.features.list[[col.name]] <- data.table(
+      thresh.dt[which.min(n.incorrect),],
+      na.count=nrow(na.dt),
+      na.guess)
+  }#col.name (single feature models)
+  single.features <- do.call(rbind, single.features.list)
+  univariate.model.list[[weight.name]] <- single.features
 }#weight.name
 
 model.RData <- paste0(train.txt, ".RData")
 cat("Saving models to ", model.RData, "\n", sep="")
-save(model.list, keep, file=model.RData)
+save(model.list, univariate.model.list, file=model.RData)

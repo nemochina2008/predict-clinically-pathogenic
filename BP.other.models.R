@@ -50,7 +50,7 @@ for(test.fold in fold.vec){
         data=xg.mat,
         nrounds=50
         )
-      fit.forest <- cforest(label ~ ., train.df, weights=train.weight.vec)
+      ##fit.forest <- cforest(label ~ ., train.df, weights=train.weight.vec)
       fit.glmnet <- cv.glmnet(train.imputed, train.labels, train.weight.vec, family="binomial")
       single.features.list <- list()
       for(col.name in colnames(data.folds.list$data$feature.mat)){
@@ -64,38 +64,45 @@ for(test.fold in fold.vec){
           "Benign"
         }
         not.na <- train.and.weights[!is.na(one.feature),]
-        ord <- order(not.na[, col.name, with=FALSE])
+        not.na.feature <- not.na[[col.name]]
+        ord <- order(not.na.feature)
         train.ord <- data.table(
           label=not.na$label,
-          feature=not.na[[col.name]],
+          feature=not.na.feature,
           weight=not.na$weight
           )[ord,]
-        train.counts <- train.ord[, list(
-          n.Benign=.SD[label=="Benign", sum(weight)],
-          n.Pathogenic=.SD[label=="Pathogenic", sum(weight)]
-          ), by=feature]
+        train.counts <- dcast(
+          train.ord,
+          feature ~ label,
+          fun.aggregate=sum,
+          value.var="weight")
         thresh.dt.list <- list()
         for(feature.sign in c(1, -1)){
           thresh.counts <- train.counts[order(feature.sign*feature),]
           ## Low scores are Benign, high scores are Pathogenic.
-          thresh.counts[, cum.FN := cumsum(n.Pathogenic)]
-          thresh.counts[, cum.FP := sum(n.Benign)-cumsum(n.Benign)]
+          thresh.counts[, cum.FN := cumsum(Pathogenic)]
+          thresh.counts[, cum.FP := sum(Benign)-cumsum(Benign)]
           thresh.counts[, n.incorrect := cum.FP + cum.FN]
           thresh.row <- thresh.counts[which.min(n.incorrect),]
           thresh <- feature.sign*thresh.row$feature
+          score.vec <- feature.sign*one.feature
           pred.vec <- ifelse(
-            feature.sign*one.feature <= thresh,
+            score.vec <= thresh,
             "Benign", "Pathogenic")
+          range.vec <- range(score.vec)
+          names(range.vec) <- c("Benign", "Pathogenic")
           is.incorrect <- pred.vec != train.df$label
           thresh.errors <- sum(is.incorrect * train.weight.vec, na.rm=TRUE)
           stopifnot(thresh.errors == thresh.row$n.incorrect)
           thresh.dt.list[[paste(feature.sign)]] <- data.table(
             feature.sign, thresh, col.name,
+            na.score=range.vec[[na.guess]],
             n.incorrect=thresh.row$n.incorrect)
         }
         thresh.dt <- do.call(rbind, thresh.dt.list)
         single.features.list[[col.name]] <- data.table(
           thresh.dt[which.min(n.incorrect),],
+          na.count=nrow(na.dt),
           na.guess)
       }#col.name (single feature models)
       single.features <- do.call(rbind, single.features.list)
@@ -147,12 +154,10 @@ for(test.fold in fold.vec){
           one.feature <- single.features[feature.i,]
           feature.name <- paste(one.feature$col.name)
           test.feature.vec <- test.df[[feature.name]]
-          pred.score <- test.feature.vec*one.feature$feature.sign
-          na.score <- ifelse(
-            one.feature$na.guess=="Pathogenic",
-            one.feature$thresh+1,
-            one.feature$thresh-1)
-          pred.score[is.na(test.feature.vec)] <- na.score
+          pred.score <- ifelse(
+            is.na(test.feature.vec),
+            one.feature$na.score,
+            test.feature.vec*one.feature$feature.sign)
           stopifnot(!is.na(pred.score))
           pred.mat.list[[feature.name]] <- pred.score
           pred.thresh.list[[feature.name]] <- one.feature$thresh

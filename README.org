@@ -1,3 +1,8 @@
+** 14 Nov 2016
+
+R scripts revised so that we can compute ROC curves for input features
+that have missing data.
+
 ** 9 Nov 2016
 
 New R scripts that can be run with command line arguments, documented
