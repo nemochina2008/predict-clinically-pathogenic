@@ -85,14 +85,14 @@ for(test.fold in fold.vec){
           thresh.counts[, n.incorrect := cum.FP + cum.FN]
           thresh.row <- thresh.counts[which.min(n.incorrect),]
           thresh <- feature.sign*thresh.row$feature
-          score.vec <- feature.sign*one.feature
+          score.vec <- feature.sign*not.na.feature
           pred.vec <- ifelse(
             score.vec <= thresh,
             "Benign", "Pathogenic")
           range.vec <- range(score.vec)
           names(range.vec) <- c("Benign", "Pathogenic")
-          is.incorrect <- pred.vec != train.df$label
-          thresh.errors <- sum(is.incorrect * train.weight.vec, na.rm=TRUE)
+          is.incorrect <- pred.vec != not.na$label
+          thresh.errors <- sum(is.incorrect * not.na$weight, na.rm=TRUE)
           stopifnot(thresh.errors == thresh.row$n.incorrect)
           thresh.dt.list[[paste(feature.sign)]] <- data.table(
             feature.sign, thresh, col.name,
