@@ -50,7 +50,7 @@ for(test.fold in fold.vec){
         data=xg.mat,
         nrounds=50
         )
-      ##fit.forest <- cforest(label ~ ., train.df, weights=train.weight.vec)
+      fit.forest <- cforest(label ~ ., train.df, weights=train.weight.vec)
       fit.glmnet <- cv.glmnet(train.imputed, train.labels, train.weight.vec, family="binomial")
       single.features.list <- list()
       for(col.name in colnames(data.folds.list$data$feature.mat)){
