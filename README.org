@@ -1,3 +1,6 @@
+** 15 Feb 2017
+Edit [[file:BP.other.models.R]] to support using some features for testing
+single variable models but not for training multi-variate models.
 ** 14 Nov 2016
 
 R scripts revised so that we can compute ROC curves for input features

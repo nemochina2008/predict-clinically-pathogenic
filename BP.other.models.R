@@ -32,6 +32,7 @@ for(test.fold in fold.vec){
     all.train.features <- data.folds.list$data$feature.mat[is.train,]
     keep <- ! colnames(all.train.features) %in% not.train.features
     train.features <- all.train.features[, keep]
+    n.train.features <- ncol(train.features)
     nb <- estim_ncpPCA(train.features)
     imputed <- MIPCA(train.features, nb$ncp)
     train.imputed <- imputed$res.imputePCA

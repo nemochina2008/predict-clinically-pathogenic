@@ -8,7 +8,8 @@ getFeatures <- function(model.name){
   factor(ifelse(
     model.name=="major.class", 0,
     ifelse(
-      model.name %in% c("ctree", "cforest", "glmnet", "xgboost"), ncol(trainData$feature.mat),
+      model.name %in% c("ctree", "cforest", "glmnet", "xgboost"),
+      n.train.features,
       ifelse(grepl("[(]", model.name), 2, 1))))
 }
 
@@ -106,6 +107,7 @@ print(gg)
 dev.off()
 
 library(animint)
+h <- 1200
 viz <- list(
   auc=ggplot()+
   theme_bw()+
@@ -119,7 +121,7 @@ viz <- list(
   geom_point(aes(auc, model.fac, color=n.features, fill=weight.name),
              shape=21,
              data=pred.dt)+
-  theme_animint(width=850, height=800)+
+  theme_animint(width=850, height=h)+
   geom_segment(aes(min.auc, model.name,
                    xend=max.auc, yend=model.name,
                    clickSelects=model.name),
@@ -130,7 +132,7 @@ viz <- list(
   roc=ggplot()+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
-  theme_animint(width=850, height=800)+
+  theme_animint(width=850, height=h)+
   facet_grid(train.name ~ test.name, labeller=label_both)+
   scale_color_manual(values=feature.colors)+
   scale_linetype_manual(values=c(balanced="dotted", one="solid"))+
@@ -145,7 +147,7 @@ viz <- list(
     showSelected=model.name),
              data=pred.dt),
   selector.types=list(model.name="multiple"),
-  first=list(model.name=c("exac03", "major.class", "xgboost")))
+  first=list(model.name=c("REVEL", "major.class", "glmnet", "VEST3_score")))
 viz$auc
 
 animint2dir(viz, "figure-BP-other-models")
