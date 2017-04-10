@@ -102,8 +102,10 @@ for(weight.name in names(weight.list)){
     train.imputed, train.labels, train.weight.vec, family="binomial")
   single.features.list <- list()
   for(col.name in colnames(train.features)){
-    one.feature <- train.df[, col.name]
-    train.and.weights <- data.table(train.df, weight=train.weight.vec)
+    one.feature <- train.features[, col.name]
+    train.and.weights <- data.table(
+      label=train.labels,
+      train.features[, col.name, drop=FALSE], weight=train.weight.vec)
     na.dt <- train.and.weights[is.na(one.feature),]
     na.guess <- if(nrow(na.dt)){
       na.class.weights <- na.dt[, list(weight=sum(weight)), by=label]
