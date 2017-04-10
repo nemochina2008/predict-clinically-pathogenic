@@ -1,3 +1,15 @@
+** 10 Apr 2017
+
+- [[file:train_model.R]] now excludes some features for multivariate model
+  training (but still uses them for univariate models).
+- [[file:predict_scores.R]] creates NAkeep and NAguess scores for each
+  univariate model -- NAkeep scores may have missing values (NA) but
+  missing values in NAguess scores are replaced with the most frequent
+  class in the missing values in the training set.
+- [[file:plot_ROC.R]] interprets scores with missing values as errors,
+  computes more test error/accuracy metrics, and saves them to
+  test.txt_predictions.RData.csv
+
 ** 15 Feb 2017
 Edit [[file:BP.other.models.R]] to support using some features for testing
 single variable models but not for training multi-variate models.
@@ -10,7 +22,6 @@ that have missing data.
 
 New R scripts that can be run with command line arguments, documented
 in [[file:example.sh]]
-
 ** 4 Nov 2016
 
 [[file:predictions.no.folds.R]] trains and tests models on whole data sets

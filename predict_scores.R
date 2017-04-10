@@ -1,32 +1,34 @@
-works_with_R("3.2.3",
-             data.table="1.9.7",
+works_with_R("3.3.3",
+             data.table="1.10.4",
              missMDA="1.10",
              glmnet="1.9.5",
-             "tdhock/WeightedROC@ef8f35ba7ae85e2995fa66afe13732cebb8b5633",
+             "tdhock/WeightedROC@4dc6e54e248dadd2c60f58b9870fd6b1d7e13eef",
              xgboost="0.4.4",
-             party="1.0.13")
+             party="1.2.2")
 
 arg.vec <- c(
   "data-2016-11-09/train.txt.RData",
   "data-2016-11-09/test1.txt"
   )
 arg.vec <- c(
-  "data/2013to2016minus-HGMD.txt.RData",
-  "data/2016-minusHGMD.txt"
+  "data-minusHGMD/2013to2016minus-HGMD.txt.RData",
+  "data-minusHGMD/2016-minusHGMD.txt"
   )
 
 arg.vec <- commandArgs(trailingOnly=TRUE)
 
-stopifnot(length(arg.vec)==2)
+if(length(arg.vec)!=2){
+  stop("Usage: Rscript predict_scores.R model.RData test.txt")
+}
 model.RData <- normalizePath(arg.vec[1], mustWork=TRUE)
 test.txt <- normalizePath(arg.vec[2], mustWork=TRUE)
 input.dt <- fread(test.txt, na.strings="-")
 objs <- load(model.RData)
 
-feature.name.vec <- univariate.model.list[[1]]$col.name
 feature.in.test <- feature.name.vec %in% names(input.dt)
 feature.missing <- feature.name.vec[!feature.in.test]
 if(length(feature.missing)){
+  print(feature.name.vec)
   stop(model.RData, " needs features listed above to predict, but ",
        test.txt, " does not have ",
        paste(feature.missing, collapse=", "))
@@ -96,7 +98,7 @@ if("clinvar" %in% names(input.dt)){
     for(model.i in 1:nrow(univariate.model.dt)){
       model.info <- univariate.model.dt[model.i,]
       model.name <- paste0(
-        model.info$col.name, ".weights=", weight.name)
+        model.info$col.name, "_NAguess.weights=", weight.name)
       test.feature.vec <- input.dt[[paste(model.info$col.name)]]
       pred.score.vec <- ifelse(
         is.na(test.feature.vec),
@@ -105,6 +107,11 @@ if("clinvar" %in% names(input.dt)){
       pred.score.dt.list[[model.name]] <- pred.score.vec
       pred.label.dt.list[[model.name]] <- ifelse(
         pred.score.vec <= model.info$thresh, "Benign", "Pathogenic")
+      na.name <- paste0(
+        model.info$col.name, "_NAkeep.weights=", weight.name)
+      pred.score.dt.list[[na.name]] <- test.feature.vec
+      pred.label.dt.list[[na.name]] <- ifelse(
+        test.feature.vec <= model.info$thresh, "Benign", "Pathogenic")
     }
   }
   predictedScores <- list(

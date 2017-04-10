@@ -1,13 +1,28 @@
-works_with_R("3.2.3",
-             data.table="1.9.7",
+works_with_R("3.3.3",
+             data.table="1.10.4",
              missMDA="1.10",
              glmnet="1.9.5",
-             "tdhock/WeightedROC@ef8f35ba7ae85e2995fa66afe13732cebb8b5633",
+             "tdhock/WeightedROC@4dc6e54e248dadd2c60f58b9870fd6b1d7e13eef",
              xgboost="0.4.4",
-             party="1.0.13")
+             party="1.2.2")
 
 arg.vec <- "data-2016-11-09/train.txt"
-arg.vec <- "data/2013to2016minus-HGMD.txt"
+arg.vec <- "data-minusHGMD/2013to2016minus-HGMD.txt"
+
+not.train.features <- c(
+  "MetaSVM_score",
+  "MetaLR_score",
+  "Eigen-raw",
+  "Eigen-PC-raw",
+  "GenoCanyon_score",
+  "VEST3_score",
+  "FATHMM_score",
+  "M-CAP_score",
+  "MutationTaster_score",
+  "fathmm-MKL_coding_score",
+  "MCAP",
+  "REVEL",
+  "esp6500siv2_all", "1000g2015aug_all")
 
 arg.vec <- commandArgs(trailingOnly=TRUE)
 
@@ -30,19 +45,29 @@ cat(
   "non-numeric columns will not be used as input features.\n")
 print(names(input.dt)[!keep])
 cat(
-  "Training using", nrow(train.features),
+  "Found", nrow(train.features),
   "variants and the following", ncol(train.features),
   "numeric features.\n")
 print(colnames(train.features))
 train.labels <- factor(input.dt$clinvar, c("Benign", "Pathogenic"))
 
+## This logical vector determines which training features we will use
+## for the multivariate models.
+not.multivar <- colnames(train.features) %in% not.train.features
+is.multivar <- !not.multivar
+cat(
+  "Not using the following", sum(not.multivar),
+  "features for multivariate model training.\n")
+print(colnames(train.features)[not.multivar])
+feature.name.vec <- colnames(train.features)[is.multivar]
+
 nb <- estim_ncpPCA(train.features)
-imputed <- MIPCA(train.features, nb$ncp)
+imputed <- MIPCA(train.features[, is.multivar], nb$ncp)
 train.imputed <- imputed$res.imputePCA
 train.01 <- ifelse(train.labels=="Pathogenic", 1, 0)
 train.df <- data.frame(
   label=train.labels,
-  train.features,
+  train.features[, is.multivar],
   check.names=FALSE)
 response.tab <- table(train.labels)
 other.tab <- response.tab
@@ -64,7 +89,8 @@ for(weight.name in names(weight.list)){
     eval_metric="auc"
   )
   xg.mat <- xgb.DMatrix(
-    train.features, label=train.01, weight=train.weight.vec, missing=NA)
+    train.features[, is.multivar],
+    label=train.01, weight=train.weight.vec, missing=NA)
   model.list[[m("xgboost")]] <- xgb.train(
     params=xg.param,
     data=xg.mat,
@@ -133,4 +159,4 @@ for(weight.name in names(weight.list)){
 
 model.RData <- paste0(train.txt, ".RData")
 cat("Saving models to ", model.RData, "\n", sep="")
-save(model.list, univariate.model.list, file=model.RData)
+save(model.list, univariate.model.list, feature.name.vec, file=model.RData)
