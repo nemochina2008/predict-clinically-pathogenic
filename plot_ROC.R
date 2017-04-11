@@ -5,6 +5,7 @@ works_with_R("3.3.3",
              "tdhock/WeightedROC@4dc6e54e248dadd2c60f58b9870fd6b1d7e13eef")
 
 arg.vec <- "data-minusHGMD/2016-minusHGMD.txt_predictions.RData"
+arg.vec <- "data/mouse_test2.txt_predictions.RData"
 
 arg.vec <- commandArgs(trailingOnly=TRUE)
 

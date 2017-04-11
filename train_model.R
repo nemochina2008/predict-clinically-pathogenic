@@ -21,6 +21,7 @@ not.train.features <- c(
   "MutationTaster_score",
   "fathmm-MKL_coding_score",
   "MCAP",
+  "SubmitterCategories",
   "REVEL",
   "esp6500siv2_all", "1000g2015aug_all")
 

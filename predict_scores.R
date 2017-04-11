@@ -14,6 +14,9 @@ arg.vec <- c(
   "data-minusHGMD/2013to2016minus-HGMD.txt.RData",
   "data-minusHGMD/2016-minusHGMD.txt"
   )
+arg.vec <- c(
+  "data/Toby_train1.txt.RData",
+  "data/mouse_test2.txt")
 
 arg.vec <- commandArgs(trailingOnly=TRUE)
 
@@ -99,19 +102,22 @@ if("clinvar" %in% names(input.dt)){
       model.info <- univariate.model.dt[model.i,]
       model.name <- paste0(
         model.info$col.name, "_NAguess.weights=", weight.name)
-      test.feature.vec <- input.dt[[paste(model.info$col.name)]]
-      pred.score.vec <- ifelse(
-        is.na(test.feature.vec),
-        model.info$na.score,
-        test.feature.vec*model.info$feature.sign)
-      pred.score.dt.list[[model.name]] <- pred.score.vec
-      pred.label.dt.list[[model.name]] <- ifelse(
-        pred.score.vec <= model.info$thresh, "Benign", "Pathogenic")
-      na.name <- paste0(
-        model.info$col.name, "_NAkeep.weights=", weight.name)
-      pred.score.dt.list[[na.name]] <- test.feature.vec
-      pred.label.dt.list[[na.name]] <- ifelse(
-        test.feature.vec <= model.info$thresh, "Benign", "Pathogenic")
+      model.col <- paste(model.info$col.name)
+      if(model.col %in% names(input.dt)){
+        test.feature.vec <- input.dt[[model.col]]
+        pred.score.vec <- ifelse(
+          is.na(test.feature.vec),
+          model.info$na.score,
+          test.feature.vec*model.info$feature.sign)
+        pred.score.dt.list[[model.name]] <- pred.score.vec
+        pred.label.dt.list[[model.name]] <- ifelse(
+          pred.score.vec <= model.info$thresh, "Benign", "Pathogenic")
+        na.name <- paste0(
+          model.info$col.name, "_NAkeep.weights=", weight.name)
+        pred.score.dt.list[[na.name]] <- test.feature.vec
+        pred.label.dt.list[[na.name]] <- ifelse(
+          test.feature.vec <= model.info$thresh, "Benign", "Pathogenic")
+      }
     }
   }
   predictedScores <- list(
