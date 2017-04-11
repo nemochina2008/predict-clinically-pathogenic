@@ -117,7 +117,7 @@ if("clinvar" %in% names(input.dt)){
           model.info$col.name, "_NAkeep.weights=", weight.name)
         pred.score.dt.list[[na.name]] <- signed.test.feature
         pred.label.dt.list[[na.name]] <- ifelse(
-          test.feature.vec <= model.info$thresh, "Benign", "Pathogenic")
+          signed.test.feature <= model.info$thresh, "Benign", "Pathogenic")
       }
     }
   }
