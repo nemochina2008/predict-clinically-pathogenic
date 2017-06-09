@@ -156,9 +156,13 @@ for(test.fold in fold.vec){
             pred.mat <- predict(fit.glmnet, test.imputed, type="response")
             as.numeric(pred.mat)
           })
+        pred.mat3 <- do.call(
+          cbind, pred.mat.list[c("xgboost", "cforest", "glmnet")])
+        pred.mat.list[["max3"]] <- apply(pred.mat3, 1, max)
         pred.thresh.list <- list(
           xgboost=0.5,
           major.class=0.5,
+          max3=0.5,
           ctree=0.5,
           cforest=0.5,
           glmnet=0.5)
@@ -197,17 +201,20 @@ for(test.fold in fold.vec){
           TPR <- TP/n.positive
           errors <- FP + FN
           n.data <- nrow(test.df)
-          pred.dot <- data.frame(
+          auc <- WeightedAUC(roc)
+          pred.dot <- data.table(
             FP, n.negative,
             TP, FN, n.positive, 
             FPR, TPR,
+            auc,
             errors, n.data,
+            SpecificityTPR0.95=data.table(roc)[TPR >= 0.95, 1-min(FPR)],
             error.percent=100*errors/n.data)
+          pred.dot[, accuracy.percent := 100-error.percent]
           ## ggplot()+
           ##   coord_equal()+
           ##   geom_point(aes(FPR, TPR), data=pred.dot)+
           ##   geom_path(aes(FPR, TPR), data=roc)
-          auc <- WeightedAUC(roc)
           key <- paste(
             model.name, test.name, train.name, test.fold, weight.name)
           BP.roc.list[[key]] <- data.table(
@@ -215,7 +222,7 @@ for(test.fold in fold.vec){
             roc)
           BP.pred.list[[key]] <- data.table(
             model.name, test.name, train.name, test.fold, weight.name,
-            auc, pred.dot)
+            pred.dot)
         }#model.name
       }#test.name
     }#weight.name
