@@ -1,3 +1,9 @@
+** 9 June 2017
+
+New score: max of three ML algos.
+
+New evaluation metric: max(Specificity) at TPR>=0.95.
+
 ** 10 Apr 2017
 
 - [[file:train_model.R]] now excludes some features for multivariate model
